@@ -68,6 +68,7 @@ class WebServerHandler(BaseHTTPRequestHandler):
                                  #new { font-size: 130%; }\
                                  </style></head>")
                 output.append("<body>")
+                output.append('<div id="new"><a href="restaurants/new">Add a New Restaurant</a></div>')
 
                 engine = create_engine('sqlite:///restaurantmenu.db')
                 Base.metadata.bind = engine
