@@ -32,7 +32,31 @@ class WebServerHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         try:
             output = ["<!DOCTYPE html>"]
-            if self.path == "/restaurants":
+            if self.path == "/hello":
+                self.send_response(200)
+                self.send_header('Content-type', 'text/html')
+                self.end_headers()
+
+                output.append("<html>")
+                output.append("<body>")
+                output.append("Hello!")
+                output.append('''<form method='POST' enctype='multipart/form-data' action='/hello'>
+                                 <h2>What would you like me to say?</h2>
+                                 <input name="message" type="text" >
+                                 <input type="submit" value="Submit"> </form>''')
+            elif self.path == "/hola":
+                self.send_response(200)
+                self.send_header('Content-type', 'text/html')
+                self.end_headers()
+
+                output.append("<html>")
+                output.append("<body>")
+                output.append("&#161Hola!")
+                output.append('''<form method='POST' enctype='multipart/form-data' action='/hello'>
+                                 <h2>What would you like me to say?</h2>
+                                 <input name="message" type="text" >
+                                 <input type="submit" value="Submit"> </form>''')
+            elif self.path == "/restaurants":
                 self.send_response(200)
                 self.send_header('Content-type', 'text/html')
                 self.end_headers()
@@ -53,12 +77,12 @@ class WebServerHandler(BaseHTTPRequestHandler):
                 for restaurant in entries:
                     output.append('<p>')
                     output.append('<div id="entry">{}</div>'.format(restaurant.name))
-                    output.append('<a href="edit_restaurant?name={}">Edit</a> '.format(restaurant.name))
-                    output.append('<a href="delete_restaurant?name={}">Delete</a>'.format(restaurant.name))
+                    output.append('<a href="restaurant/{}/edit">Edit</a> '.format(restaurant.name))
+                    output.append('<a href="restaurant/{}/delete">Delete</a>'.format(restaurant.name))
                     output.append('</p>')
 
-                output.append('<div id="new"><a href="new_restaurant">Add a new restaurant</a></div>')
-            elif self.path == "/new_restaurant":
+                output.append('<div id="new"><a href="restaurants/new">Add a New Restaurant</a></div>')
+            elif self.path == "/restaurants/new":
                 self.send_response(200)
                 self.send_header('Content-type', 'text/html')
                 self.end_headers()
@@ -68,30 +92,37 @@ class WebServerHandler(BaseHTTPRequestHandler):
                 output.append("<body>")
 
                 output.append('<H1>Add a New Restaurant</H1>')
-                output.append("<form method='POST' enctype='multipart/form-data' action='/add_restaurant'>\
-                              Restaurant Name: <input name='name' type='text'>\
-                              <input type='submit' value='Add'></form>")
-            elif self.path.startswith("/edit_restaurant?"):
-                self.send_response(200)
-                self.send_header('Content-type', 'text/html')
-                self.end_headers()
+                output.append('<form method="POST" enctype="multipart/form-data" action="/restaurants/new">')
+                output.append('Restaurant Name: <input name="name" type="text">')
+                output.append('<input type="submit" value="Add"></form>')
+            elif self.path.startswith("/restaurant"):
+                _,_,restaurant_name_encoded,action = self.path.split('/')
+                restaurant_name = urlparse.parse_qs("a={}".format(restaurant_name_encoded))['a'][0]
+                if action == 'edit':
+                    self.send_response(200)
+                    self.send_header('Content-type', 'text/html')
+                    self.end_headers()
 
-                output.append("<html>")
-                output.append("<head><style> body { font-size: 120%; }</style></head>")
-                output.append("<body>")
+                    output.append("<html>")
+                    output.append("<head><style> body { font-size: 120%; }</style></head>")
+                    output.append("<body>")
 
+                    output.append('<H1>Rename Restaurant "{}"</H1>'.format(restaurant_name))
+                    output.append("<form method='POST' enctype='multipart/form-data' action='/restaurant/{}/edit'>".format(restaurant_name))
+                    output.append("New Restaurant Name: <input name='name' type='text'>")
+                    output.append("<input type='submit' value='Rename'></form>")
+                elif action == 'delete':
+                    self.send_response(200)
+                    self.send_header('Content-type', 'text/html')
+                    self.end_headers()
 
-                path_parts = urlparse.urlparse(self.path)
-                self.logger.debug('Path Parts: {}'.format(path_parts))
-                self.logger.debug('Query: {}'.format(path_parts.query))
-                query_parameters = urlparse.parse_qs(path_parts.query)
-                self.logger.debug('Query Parameters: {}'.format(query_parameters))
-                restaurant_name = query_parameters['name'][0]
-                output.append('<H1>Rename Restaurant "{}"</H1>'.format(restaurant_name))
-                output.append("<form method='POST' enctype='multipart/form-data' action='/rename_restaurant'>\
-                              New Restaurant Name: <input name='name' type='text'>\
-                              <input type='submit' value='Rename'>\
-                              <input type='hidden' name='old_name' value='{}'></form>".format(restaurant_name))
+                    output.append("<html>")
+                    output.append("<head><style> body { font-size: 120%; }</style></head>")
+                    output.append("<body>")
+
+                    output.append('<H1>Confirm Deletion of Restaurant "{}"</H1>'.format(restaurant_name))
+                    output.append("<form method='POST' enctype='multipart/form-data' action='/restaurant/{}/delete'>".format(restaurant_name))
+                    output.append("<input type='submit' value='Delete'></form>")
 
             else:
                 raise self.WebServerException('Unsupported route.')
@@ -116,7 +147,16 @@ class WebServerHandler(BaseHTTPRequestHandler):
                 fields = cgi.parse_multipart(self.rfile, parameters)
 
                 output = []
-                if self.path == "/add_restaurant":
+                if self.path == '/hello':
+                    message = fields.get('message')[0]
+                    output.append("<html><body>")
+                    output.append('<h2> Okay, how about this: </h2>')
+                    output.append('<h1> {} </h1>'.format(message))
+                    output.append('''<form method='POST' enctype='multipart/form-data' action='/hello'>
+                                     <h2>What would you like me to say?</h2>
+                                     <input name="message" type="text" >
+                                     <input type="submit" value="Submit"> </form>''')
+                elif self.path == "/restaurants/new":
                     restaurant_name = fields.get('name')[0]
                     self.logger.debug(restaurant_name)
 
@@ -128,34 +168,49 @@ class WebServerHandler(BaseHTTPRequestHandler):
                     session = DBSession()
                     restaurants = session.query(Restaurant).filter_by(name=restaurant_name)
                     if restaurants.count() > 0:
-                        output.append("  <h2> Restaurant {} already exists. </h2>".format(restaurant_name))
+                        output.append('<h2> Restaurant "{}" already exists. </h2>'.format(restaurant_name))
                     else:
                         restaurant = Restaurant(name = restaurant_name)
                         session.add(restaurant)
                         session.commit()
-                        output.append('  <h2> Added restaurant "{}". </h2>'.format(restaurant_name))
-                    output.append('<a href="restaurants">View Restaurants</a>')
-                elif self.path == "/rename_restaurant":
-                    self.logger.debug('Fields: {}'.format(fields))
-                    restaurant_name = fields.get('old_name')[0]
-                    self.logger.debug(restaurant_name)
+                        output.append('<h2> Added Restaurant "{}". </h2>'.format(restaurant_name))
+                    output.append('<a href="/restaurants">View Restaurants</a>')
+                elif self.path.startswith('/restaurant/'):
+                    _,_,restaurant_name_encoded,action = self.path.split('/')
+                    restaurant_name = urlparse.parse_qs("a={}".format(restaurant_name_encoded))['a'][0]
+                    if action == 'edit':
+                        output.append("<html><body>")
 
-                    output.append("<html><body>")
+                        engine = create_engine('sqlite:///restaurantmenu.db')
+                        Base.metadata.bind = engine
+                        DBSession = sessionmaker(bind = engine)
+                        session = DBSession()
+                        restaurants = session.query(Restaurant).filter_by(name=restaurant_name)
+                        if restaurants.count() < 0:
+                            output.append("  <h2> Restaurant {} does not exists. </h2>".format(restaurant_name))
+                        else:
+                            restaurant = restaurants[0]
+                            restaurant.name = fields.get('name')[0]
+                            session.add(restaurant)
+                            session.commit()
+                            output.append('  <h2> Renamed restaurant "{}" to "{}". </h2>'.format(restaurant_name, restaurant.name))
+                        output.append('<a href="/restaurants">View Restaurants</a>')
+                    elif action == 'delete':
+                        output.append("<html><body>")
 
-                    engine = create_engine('sqlite:///restaurantmenu.db')
-                    Base.metadata.bind = engine
-                    DBSession = sessionmaker(bind = engine)
-                    session = DBSession()
-                    restaurants = session.query(Restaurant).filter_by(name=restaurant_name)
-                    if restaurants.count() < 0:
-                        output.append("  <h2> Restaurant {} does not exists. </h2>".format(restaurant_name))
-                    else:
-                        restaurant = restaurants[0]
-                        restaurant.name = fields.get('name')[0]
-                        session.add(restaurant)
-                        session.commit()
-                        output.append('  <h2> Renamed restaurant "{}" to "{}". </h2>'.format(restaurant_name, restaurant.name))
-                    output.append('<a href="restaurants">View Restaurants</a>')
+                        engine = create_engine('sqlite:///restaurantmenu.db')
+                        Base.metadata.bind = engine
+                        DBSession = sessionmaker(bind = engine)
+                        session = DBSession()
+                        restaurants = session.query(Restaurant).filter_by(name=restaurant_name)
+                        if restaurants.count() == 0:
+                            output.append("  <h2> Restaurant {} does not exists. </h2>".format(restaurant_name))
+                        else:
+                            restaurant = restaurants[0]
+                            session.delete(restaurant)
+                            session.commit()
+                            output.append('  <h2> Deleted restaurant "{}". </h2>'.format(restaurant_name))
+                        output.append('<a href="/restaurants">View Restaurants</a>')
 
                 output.append("</body</html>")
                 output = ''.join(output)
