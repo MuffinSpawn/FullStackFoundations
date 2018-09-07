@@ -139,7 +139,7 @@ class WebServerHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         try:
             self.send_response(301)
-            self.end_headers()
+            self.send_header('Content-type', 'text/html')
 
             content_type, parameters = cgi.parse_header(self.headers.getheader('content-type'))
             if content_type == 'multipart/form-data':
@@ -168,13 +168,14 @@ class WebServerHandler(BaseHTTPRequestHandler):
                     session = DBSession()
                     restaurants = session.query(Restaurant).filter_by(name=restaurant_name)
                     if restaurants.count() > 0:
-                        output.append('<h2> Restaurant "{}" already exists. </h2>'.format(restaurant_name))
+                       output.append('<h2> Restaurant "{}" already exists. </h2>'.format(restaurant_name))
                     else:
+                        self.send_header('Location', '/restaurants')
+
                         restaurant = Restaurant(name = restaurant_name)
                         session.add(restaurant)
                         session.commit()
                         output.append('<h2> Added Restaurant "{}". </h2>'.format(restaurant_name))
-                    output.append('<a href="/restaurants">View Restaurants</a>')
                 elif self.path.startswith('/restaurant/'):
                     _,_,restaurant_name_encoded,action = self.path.split('/')
                     restaurant_name = urlparse.parse_qs("a={}".format(restaurant_name_encoded))['a'][0]
@@ -186,15 +187,16 @@ class WebServerHandler(BaseHTTPRequestHandler):
                         DBSession = sessionmaker(bind = engine)
                         session = DBSession()
                         restaurants = session.query(Restaurant).filter_by(name=restaurant_name)
-                        if restaurants.count() < 0:
-                            output.append("  <h2> Restaurant {} does not exists. </h2>".format(restaurant_name))
+                        if restaurants.count() == 0:
+                            output.append('<h2> Restaurant "{}" does not exist. </h2>'.format(restaurant_name))
+                            output.append('<a href="/restaurants">View Restaurants</a>')
                         else:
+                            self.send_header('Location', '/restaurants')
+
                             restaurant = restaurants[0]
                             restaurant.name = fields.get('name')[0]
                             session.add(restaurant)
                             session.commit()
-                            output.append('  <h2> Renamed restaurant "{}" to "{}". </h2>'.format(restaurant_name, restaurant.name))
-                        output.append('<a href="/restaurants">View Restaurants</a>')
                     elif action == 'delete':
                         output.append("<html><body>")
 
@@ -203,17 +205,20 @@ class WebServerHandler(BaseHTTPRequestHandler):
                         DBSession = sessionmaker(bind = engine)
                         session = DBSession()
                         restaurants = session.query(Restaurant).filter_by(name=restaurant_name)
+                        self.logger.debug('Search Count: {}'.format(restaurants.count()))
                         if restaurants.count() == 0:
-                            output.append("  <h2> Restaurant {} does not exists. </h2>".format(restaurant_name))
+                            output.append('<h2> Restaurant "{}" does not exist. </h2>'.format(restaurant_name))
+                            output.append('<a href="/restaurants">View Restaurants</a>')
                         else:
+                            self.send_header('Location', '/restaurants')
+
                             restaurant = restaurants[0]
                             session.delete(restaurant)
                             session.commit()
-                            output.append('  <h2> Deleted restaurant "{}". </h2>'.format(restaurant_name))
-                        output.append('<a href="/restaurants">View Restaurants</a>')
 
                 output.append("</body</html>")
                 output = ''.join(output)
+                self.end_headers()
                 self.wfile.write(output)
                 self.logger.debug(output)
             self.logger.debug('Done with POST processing.')
