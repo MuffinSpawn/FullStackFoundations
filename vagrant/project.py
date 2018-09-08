@@ -19,37 +19,20 @@ def listRestaurants():
     output = []
 
     restaurants = session.query(Restaurant).all()
-    for restaurant in restaurants:
-        output.append('<a href="/restaurants/{}/">{}</a><br/>'.format(restaurant.id, restaurant.name))
-    return ''.join(output)
+    return flask.render_template('restaurants.html', restaurants=restaurants)
 
 @app.route('/restaurants/<int:restaurant_id>/')
-def restaurantMenu(restaurant_id=0):
+def listMenuItems(restaurant_id=0):
     session = DBSession()
     menu_items = None
     output = []
 
     restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
     menu_items = session.query(MenuItem).filter_by(restaurant_id=restaurant_id)
-    output.append('<a href="/restaurants">Back</a><BR/>')
-    output.append('<H1>{} Menu</H1>'.format(restaurant.name))
-
-    for menu_item in menu_items:
-        output.append('{}<BR/>'.format(menu_item.name))
-        output.append('{}<BR/>'.format(menu_item.price))
-        output.append('{}<BR/>'.format(menu_item.description))
-        output.append('<BR/>')
-
-    output.append('<a href="/restaurants">Back</a><BR/>')
-
-    return ''.join(output)
+    return flask.render_template('menu.html', restaurant=restaurant, menu_items=menu_items)
 
 @app.route('/restaurants/new/', methods=['GET', 'POST'])
-def addRestaurant():
-    output = []
-    output.append('<a href="/restaurants">Back</a><BR/>')
-    output.append('<H1>Add New Restaurant</H1>')
-
+def newRestaurant():
     if flask.request.method == 'POST':
         restaurant_name = flask.request.values.get('name')
         session = DBSession()
@@ -58,10 +41,29 @@ def addRestaurant():
         session.commit()
         return flask.redirect("/restaurants", code=301)
 
-    output.append('<form method="POST" enctype="multipart/form-data" action="/restaurants/new/">')
-    output.append('Restaurant Name: <input name="name" type="text">')
-    output.append('<input type="submit" value="Add"></form>')
-    return ''.join(output)
+    return flask.render_template('new_restaurant.html')
+
+@app.route('/restaurant/<int:restaurant_id>/edit/', methods=['GET', 'POST'])
+def editRestaurant(restaurant_id=0):
+    if flask.request.method == 'POST':
+        session = DBSession()
+        restaurant = session.query(Restaurants).filter_by(id=restaurant_id).one()
+        session.delete(restaurant)
+        session.commit()
+        return flask.redirect("/restaurants", code=301)
+
+    return flask.render_template('edit_restaurant.html')
+
+@app.route('/restaurant/<int:restaurant_id>/delete/', methods=['GET', 'POST'])
+def deleteRestaurant(restaurant_id=0):
+    if flask.request.method == 'POST':
+        session = DBSession()
+        restaurant = session.query(Restaurants).filter_by(id=restaurant_id).one()
+        session.delete(restaurant)
+        session.commit()
+        return flask.redirect("/restaurants", code=301)
+
+    return flask.render_template('delete_restaurant.html')
 
 if __name__ == '__main__':
     app.debug = True
