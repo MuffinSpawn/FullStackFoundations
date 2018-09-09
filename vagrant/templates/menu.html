@@ -8,10 +8,22 @@
 	#entry {
 		font-size: 16pt;
 	}
+	#message {
+		background-color: pink;
+		font-size: 18pt;
+		color: white;
+	}
 	</style>
 </head>
 <body>
 	<h1>{{ restaurant.name }} Menu</h1>
+	{% with messages = get_flashed_messages() %}
+		{% if messages %}
+			{% for message in messages %}
+			<p id="message">{{ message }}</p>
+			{% endfor %}
+		{% endif %}
+	{% endwith %}
 	<a href="{{ url_for('listRestaurants') }}" id="toplink">Restaurants</a>&nbsp;
 	<a href="{{ url_for('newMenuItem', restaurant_id=restaurant.id) }}" id="toplink">Add New Menu Item</a><br/><br/>
 

@@ -27,6 +27,7 @@ def newRestaurant():
         restaurant = Restaurant(name = restaurant_name)
         session.add(restaurant)
         session.commit()
+        flask.flash('Restaurant {} added.'.format(restaurant.name))
         return flask.redirect(flask.url_for('listRestaurants'), code=301)
 
     return flask.render_template('new_restaurant.html')
@@ -50,6 +51,7 @@ def editRestaurant(restaurant_id=0):
         restaurant.name = flask.request.values.get('name')
         session.add(restaurant)
         session.commit()
+        flask.flash('Restaurant {} updated.'.format(restaurant.name))
         return flask.redirect(flask.url_for('listRestaurants'), code=301)
 
     return flask.render_template('edit_restaurant.html', restaurant=restaurant)
@@ -62,6 +64,7 @@ def deleteRestaurant(restaurant_id=0):
     if flask.request.method == 'POST':
         session.delete(restaurant)
         session.commit()
+        flask.flash('Restaurant {} deleted.'.format(restaurant.name))
         return flask.redirect(flask.url_for('listRestaurants'), code=301)
 
     return flask.render_template('delete_restaurant.html', restaurant=restaurant)
@@ -78,6 +81,7 @@ def newMenuItem(restaurant_id):
         menu_item = MenuItem(name=name, description=description, course=course, price=price, restaurant_id=restaurant_id)
         session.add(menu_item)
         session.commit()
+        flask.flash('Menu item {} added.'.format(menu_item.name))
         return flask.redirect(flask.url_for('listMenuItems', restaurant_id=restaurant_id), code=301)
 
     courses = ['Appetizer', 'Beverage', 'Dessert', 'Entree']
@@ -90,12 +94,16 @@ def editMenuItem(restaurant_id, menu_item_id):
     restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
     menu_item = session.query(MenuItem).filter_by(id=menu_item_id).one()
     if flask.request.method == 'POST':
+        old_name = menu_item.name
         menu_item.name = flask.request.values.get('name')
         menu_item.description = flask.request.values.get('description')
         menu_item.course = flask.request.values.get('course')
         menu_item.price = flask.request.values.get('price')
         session.add(menu_item)
         session.commit()
+        if old_name != menu_item.name:
+            flask.flash('Menu item {} renamed to {}.'.format(old_name, menu_item.name))
+        flask.flash('Menu item {} was updated.'.format(menu_item.name))
         return flask.redirect(flask.url_for('listMenuItems', restaurant_id=restaurant_id), code=301)
 
     courses = ['Appetizer', 'Beverage', 'Dessert', 'Entree']
@@ -110,11 +118,13 @@ def deleteMenuItem(restaurant_id, menu_item_id):
     if flask.request.method == 'POST':
         session.delete(menu_item)
         session.commit()
+        flask.flash('Menu item {} was deleted.'.format(menu_item.name))
         return flask.redirect(flask.url_for('listMenuItems', restaurant_id=restaurant_id), code=301)
 
     return flask.render_template('delete_menu_item.html', restaurant=restaurant, menu_item=menu_item)
 
 
 if __name__ == '__main__':
+    app.secret_key = 'super_secret_key'
     app.debug = True
     app.run(host = '0.0.0.0', port = 5000)
