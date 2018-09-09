@@ -12,15 +12,15 @@
 </head>
 <body>
 	<h1>{{ restaurant.name }} Menu</h1>
-	<a href="/restaurants/" id="toplink">Restaurants</a>&nbsp;
-	<a href="/restaurant/{{ restaurant.id }}/items/new/" id="toplink">Add New Menu Item</a><br/><br/>
+	<a href="{{ url_for('listRestaurants') }}" id="toplink">Restaurants</a>&nbsp;
+	<a href="{{ url_for('newMenuItem', restaurant_id=restaurant.id) }}" id="toplink">Add New Menu Item</a><br/><br/>
 
     {% for menu_item in menu_items %}
         <div id="entry">{{ menu_item.name }}</div>
         <div id="entry">{{ menu_item.description }}</div>
         <div id="entry">{{ menu_item.price }}</div>
-        <a href="/restaurant/{{restaurant.id }}/item/{{ menu_item.id }}/edit/" >Edit</a>
-        <a href="/restaurant/{{restaurant.id }}/item/{{ menu_item.id }}/delete/">Delete</a> <br/><br/>
+        <a href="{{ url_for('editMenuItem', restaurant_id=restaurant.id, menu_item_id=menu_item.id) }}" >Edit</a>
+        <a href="{{ url_for('deleteMenuItem', restaurant_id=restaurant.id, menu_item_id=menu_item.id) }}">Delete</a> <br/><br/>
     {% endfor %}
     <br/>
 </body>

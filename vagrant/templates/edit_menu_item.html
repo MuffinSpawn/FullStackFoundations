@@ -17,10 +17,10 @@
 <body>
     <div class="jumbotron text-center">
       <h1>Edit Menu Item at {{ restaurant.name }}</h1>
-      <p><a href="/restaurant/{{ restaurant.id }}/" id="toplink">{{ restaurant.name }} Menu</a></p> 
+      <p><a href="{{ url_for('listMenuItems', restaurant_id=restaurant.id) }}" id="toplink">{{ restaurant.name }} Menu</a></p> 
     </div>
 
-    <form method="POST" enctype="multipart/form-data" action="/restaurant/{{ restaurant.id }}/item/{{ menu_item.id }}/edit/">
+    <form method="POST" enctype="multipart/form-data" action="{{ url_for('editMenuItem', restaurant_id=restaurant.id, menu_item_id=menu_item.id) }}">
     <div class="container">
       <div class="row">
         <div class="col-sm-4"> </div>
@@ -70,9 +70,10 @@
       <div class="row">
         <div class="col-sm-4"> </div>
         <div class="col-sm-4 text-center">
-          <input type="submit" value="Update" ><br/></form>
+          <input type="submit" value="Update" ><br/>
         </div>
       </div>
     </div>
+    </form>
 </body>
 </html>

@@ -17,10 +17,10 @@
 <body>
     <div class="jumbotron text-center">
       <h1>Add New Menu Item at {{ restaurant.name }}</h1>
-      <p><a href="/restaurant/{{ restaurant.id }}/" id="toplink">{{ restaurant.name }} Menu</a></p> 
+      <p><a href="{{url_for('listMenuItems', restaurant_id=restaurant.id) }}" id="toplink">{{ restaurant.name }} Menu</a></p> 
     </div>
 
-    <form method="POST" enctype="multipart/form-data" action="/restaurant/{{ restaurant.id }}/items/new/">
+    <form method="POST" enctype="multipart/form-data" action="{{ url_for('newMenuItem', restaurant_id=restaurant.id) }}">
     <div class="container">
       <div class="row">
         <div class="col-sm-4"> </div>
