@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	<style>
+	#toplink {
+		font-weight: bold;
+	}
+	#field {
+		font-size: 16pt;
+	}
+	</style>
+</head>
+<body>
+    <div class="jumbotron text-center">
+      <h1>Edit Menu Item at {{ restaurant.name }}</h1>
+      <p><a href="/restaurant/{{ restaurant.id }}/" id="toplink">{{ restaurant.name }} Menu</a></p> 
+    </div>
+
+    <form method="POST" enctype="multipart/form-data" action="/restaurant/{{ restaurant.id }}/item/{{ menu_item.id }}/edit/">
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-4"> </div>
+        <div class="col-sm-2">
+          <p id="field">Name</p>
+        </div>
+        <div class="col-sm-2">
+          <input name="name" type="text" value="{{ menu_item.name }}">
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-4"> </div>
+        <div class="col-sm-2">
+          <p id="field">Description</p>
+        </div>
+        <div class="col-sm-2">
+          <input name="description" type="text" value="{{ menu_item.description }}">
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-4"> </div>
+        <div class="col-sm-2">
+          <p id="field">Course</p>
+        </div>
+        <div class="col-sm-2">
+          <select name="course">
+          {% for course in courses %}
+            <option value="{{ course }}">{{ course }}</option>
+          	{% if menu_item.course == course %}
+            <option value="{{ course }}" selected>{{ course }}</option>
+            {% else %}
+            <option value="{{ course }}">{{ course }}</option>
+            {% endif %}
+          {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-4"> </div>
+        <div class="col-sm-2">
+          <p id="field">Price</p>
+        </div>
+        <div class="col-sm-2">
+          <p><input name="price" type="text" value="{{ menu_item.price }}"></p>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-4"> </div>
+        <div class="col-sm-4 text-center">
+          <input type="submit" value="Update" ><br/></form>
+        </div>
+      </div>
+    </div>
+</body>
+</html>

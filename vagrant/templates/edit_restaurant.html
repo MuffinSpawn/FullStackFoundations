@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<style>
+	#toplink {
+		font-weight: bold;
+	}
+	#entry {
+		font-size: 16pt;
+	}
+	</style>
+</head>
+<body>
+	<h1>Edit Restaurant {{ restaurant.name }}</h1>
+    <a href="/restaurants" id="toplink">Restaurants</a><br/><br/>
+
+    <form method="POST" enctype="multipart/form-data" action="/restaurant/{{ restaurant.id }}/edit/">
+    Restaurant Name: <input name="name" type="text">
+    <input type="submit" value="Update"></form>
+    <br/>
+</body>
+</html>

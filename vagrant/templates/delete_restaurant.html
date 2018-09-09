@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<style>
+	#toplink {
+		font-weight: bold;
+	}
+	#entry {
+		font-size: 16pt;
+	}
+	</style>
+</head>
+<body>
+	<h1>Delete Restaurant {{ restaurant.name }}</h1>
+    <a href="/restaurants" id="toplink">Restaurants</a><br/><br/>
+
+    <form method="POST" enctype="multipart/form-data" action="/restaurant/{{ restaurant.id }}/delete/">
+    <input type="submit" value="Delete"></form>
+    <br/>
+</body>
+</html>
