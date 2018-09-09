@@ -1,0 +1,14 @@
+	#toplink {
+		font-weight: bold;
+	}
+	#entry {
+		font-size: 16pt;
+	}
+	#message {
+		background-color: pink;
+		font-size: 18pt;
+		color: white;
+	}
+	#field {
+		font-size: 16pt;
+	}
