@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<style>
+	#toplink {
+		font-weight: bold;
+	}
+	#entry {
+		font-size: 16pt;
+	}
+	</style>
+</head>
+<body>
+	<h1>Restaurants</h1>
+	<p><a href="/restaurants/new/" id="toplink">Add New Restaurant</a></p>
+    {% for restaurant in restaurants %}
+        <a href="/restaurants/{{ restaurant.id }}/" id="entry">{{ restaurant.name }}</a><br/>
+        <a href="/restaurant/{{restaurant.id }}/edit" >Edit</a>
+        <a href="/restaurant/{{restaurant.id }}/delete">Delete</a> <br/><br/>
+    {% endfor %}
+</body>
+</html>
