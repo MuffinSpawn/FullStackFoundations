@@ -35,12 +35,16 @@ def newRestaurant():
 @app.route('/restaurant/<int:restaurant_id>/')
 def listMenuItems(restaurant_id=0):
     session = DBSession()
-    menu_items = None
-    output = []
-
     restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
     menu_items = session.query(MenuItem).filter_by(restaurant_id=restaurant_id)
     return flask.render_template('menu.html', restaurant=restaurant, menu_items=menu_items)
+
+@app.route('/restaurant/<int:restaurant_id>/json/')
+def getMenuItems(restaurant_id=0):
+    session = DBSession()
+    restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
+    menu_items = session.query(MenuItem).filter_by(restaurant_id=restaurant_id)
+    return flask.jsonify(name=restaurant.name, menu=[item.json for item in menu_items])
 
 @app.route('/restaurant/<int:restaurant_id>/edit/', methods=['GET', 'POST'])
 def editRestaurant(restaurant_id=0):
@@ -87,6 +91,12 @@ def newMenuItem(restaurant_id):
     courses = ['Appetizer', 'Beverage', 'Dessert', 'Entree']
 
     return flask.render_template('new_menu_item.html', restaurant=restaurant, courses=courses)
+
+@app.route('/restaurant/<int:restaurant_id>/item/<int:menu_item_id>/json/')
+def getMenuItem(restaurant_id, menu_item_id):
+    session = DBSession()
+    menu_item = session.query(MenuItem).filter_by(id=menu_item_id).one()
+    return flask.jsonify(menuitem=menu_item.json)
 
 @app.route('/restaurant/<int:restaurant_id>/item/<int:menu_item_id>/edit/', methods=['GET', 'POST'])
 def editMenuItem(restaurant_id, menu_item_id):
